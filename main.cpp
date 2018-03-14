@@ -16,6 +16,10 @@
 #include "graph.h"
 
 int main(){
+  int _time = 0;
+  int _count = 0;
+  int* _ptrTime = &_time;
+  int* _ptrCount = &_count;
   int numRegions, numConnections, v, u;
   scanf("%d %d", &numRegions, &numConnections);
   Graph *graph = new Graph(numRegions);
@@ -23,8 +27,8 @@ int main(){
     scanf("%d %d", &v, &u);
     graph->addVertex(v, u);
   }
-  //graph->toString();
-  graph->visit(0);
+  graph->visit(0, _ptrTime, _ptrCount);
+  std::cout << *_ptrCount << std::endl;
   delete graph;
   return 0;
 }
