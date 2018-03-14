@@ -49,6 +49,9 @@
       if(_discTime[adjVertex] == NOTIME){
         visit(adjVertex, _ptrTime, _ptrCount);
         _low[ind] = std::min(_low[ind], _low[adjVertex]); //update low value
+        if(_low[adjVertex] > _discTime[ind]){
+          std::cout << ind+1 << " " << adjVertex+1 << std::endl; //finding right path of bridge
+        }
       }
       //the vertex was already visited
       else if(_inStack[adjVertex] == true){
