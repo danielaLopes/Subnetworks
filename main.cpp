@@ -11,7 +11,6 @@
 
 #include <list>
 #include <string>
-#include <stdio.h>
 #include <iostream>
 #include "graph.h"
 
@@ -29,6 +28,7 @@ int main(){
   }
   graph->visit(0, _ptrTime, _ptrCount);
   std::cout << *_ptrCount << std::endl;
+  graph->orderBridges();
   delete graph;
   return 0;
 }

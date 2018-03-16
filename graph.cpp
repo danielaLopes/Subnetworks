@@ -2,6 +2,9 @@
 
 #include "graph.h"
 
+  std::vector< std::vector<int> > _sccs(100);
+  std::vector<int> bridges;
+
   //Constructor
   Graph::Graph(const int v){
     _v = v;
@@ -11,6 +14,7 @@
     _stack = new std::stack<int>[_v];
     _discTime = new int[_v];
     _low = new int[_v];
+    _fromSCC = new int[_v];
     for(int i = 0; i < _v; i++){
       _inStack[i] = false;
       _discTime[i] = NOTIME;
@@ -28,11 +32,16 @@
     delete[] _discTime;
     delete[] _low;
     delete[] _stack;
+    delete[] _fromSCC;
   }
 
   void Graph::addVertex(const int v, const int u){
     _adjList[v-1].push_back(u-1); //the positions of the vertexes are always vertex-1
   }
+
+  /*int Graph::compare(const void *ptr1, const void *ptr2){
+    return (*(int*)ptr1 - *(int*)ptr2);
+  }*/
 
 //Tarjan's visit algorithm
   void Graph::visit(const int ind, int *_ptrTime, int *_ptrCount){
@@ -50,7 +59,9 @@
         visit(adjVertex, _ptrTime, _ptrCount);
         _low[ind] = std::min(_low[ind], _low[adjVertex]); //update low value
         if(_low[adjVertex] > _discTime[ind]){
-          std::cout << ind+1 << " " << adjVertex+1 << std::endl; //finding right path of bridge
+          _bridgePairs.push_back(ind+1);
+          _bridgePairs.push_back(adjVertex+1);
+          //std::cout << ind+1 << " " << adjVertex+1 << std::endl; //finding right path of bridge
         }
       }
       //the vertex was already visited
@@ -61,19 +72,44 @@
     //root of a SCC found
     if(_low[ind] == _discTime[ind]){
       int j = 0;
+      int min = (int) _stack->top();
       while(_stack->top() != ind+1){
         j = (int) _stack->top();
+        if(min > j){ min = j; }
         _inStack[j-1] = false;
+        _sccs[*_ptrCount].push_back(j);
+        _fromSCC[j-1] = *_ptrCount;
         _stack->pop();
       }
       _inStack[j-1] = false;
+      j = (int) _stack->top();
+      if(min > j){ min = j; }
+      _parents.push_back(min);
+      _sccs[*_ptrCount].push_back(j);
+      _fromSCC[j-1] = *_ptrCount;
       _stack->pop();
+      //bridges.push_back(_parents[_fromSCC[_bridgePairs[0]-1]]*10 + _parents[_fromSCC[_bridgePairs[1]-1]]);
+      //APAGAR DEPOIS
+      /*for(int k = 0; k < _sccs[*_ptrCount].size(); k++){
+        std::cout << _sccs[*_ptrCount][k] << " SCCs" << std::endl;
+      }
+      for(int k = 0; k < _v; k++){
+        printf("%d\n", _fromSCC[k]);
+      }*/
+
       ++*_ptrCount;
     }
-}
+  }
 
   void Graph::toString(){
     for(int i = 0; i < _v; i++){
       std::cout << &_adjList[i] << std::endl;
     }
+  }
+
+  void Graph::orderBridges(){
+    for(int i = 0; i < _bridgePairs.size()-1; i+=2){
+      std::cout << _parents[_fromSCC[_bridgePairs[i]-1]]*10 + _parents[_fromSCC[_bridgePairs[i+1]-1]] << " bridge " << std::endl;
+    }
+    //falta ordernar
   }
