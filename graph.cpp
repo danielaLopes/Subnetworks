@@ -112,4 +112,5 @@
       std::cout << _parents[_fromSCC[_bridgePairs[i]-1]]*10 + _parents[_fromSCC[_bridgePairs[i+1]-1]] << " bridge " << std::endl;
     }
     //falta ordernar
+    //voltar a separar e dps imprimir
   }

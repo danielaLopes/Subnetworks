@@ -27,8 +27,8 @@ int main(){
     graph->addVertex(v, u);
   }
   graph->visit(0, _ptrTime, _ptrCount);
-  std::cout << *_ptrCount << std::endl;
-  graph->orderBridges();
+  printf("%d\n", *_ptrCount);
+  if(*_ptrCount > 1) { graph->orderBridges(); }
   delete graph;
   return 0;
 }
