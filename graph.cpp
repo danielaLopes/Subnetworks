@@ -2,19 +2,19 @@
 
 #include "graph.h"
 
-  std::vector< std::vector<int> > _sccs(100);
+  std::vector< std::vector<int> > _sccs(100); //APAGAR
   std::vector<int> bridges;
 
   //Constructor
   Graph::Graph(const int v){
     _v = v;
     _adjList = new std::list<int>[_v];
+    _low = new int[_v];
+    _fromSCC = new int[_v];
     //Initialize Stacks
     _inStack = new bool[_v];
     _stack = new std::stack<int>[_v];
     _discTime = new int[_v];
-    _low = new int[_v];
-    _fromSCC = new int[_v];
     for(int i = 0; i < _v; i++){
       _inStack[i] = false;
       _discTime[i] = NOTIME;
@@ -44,7 +44,7 @@
   }*/
 
 //Tarjan's visit algorithm
-  void Graph::visit(const int ind, int *_ptrTime, int *_ptrCount){
+  void Graph::visit(const int ind, int *_ptrTime, int *_ptrCount, int *_ptrBridges){
     int adjVertex;
     _discTime[ind] = ++*(_ptrTime);
     _low[ind] = *(_ptrTime);
@@ -56,11 +56,12 @@
       adjVertex = *it;
       //visit unvisited adjacent vertex
       if(_discTime[adjVertex] == NOTIME){
-        visit(adjVertex, _ptrTime, _ptrCount);
+        visit(adjVertex, _ptrTime, _ptrCount, _ptrBridges);
         _low[ind] = std::min(_low[ind], _low[adjVertex]); //update low value
         if(_low[adjVertex] > _discTime[ind]){
           _bridgePairs.push_back(ind+1);
           _bridgePairs.push_back(adjVertex+1);
+          ++*_ptrBridges;
           //std::cout << ind+1 << " " << adjVertex+1 << std::endl; //finding right path of bridge
         }
       }
@@ -81,8 +82,8 @@
         _fromSCC[j-1] = *_ptrCount;
         _stack->pop();
       }
-      _inStack[j-1] = false;
       j = (int) _stack->top();
+      _inStack[j-1] = false;
       if(min > j){ min = j; }
       _parents.push_back(min);
       _sccs[*_ptrCount].push_back(j);
@@ -107,7 +108,8 @@
     }
   }
 
-  void Graph::orderBridges(){
+  void Graph::orderBridges(int *_ptrBridges){
+    printf("%d\n", *_ptrBridges);
     for(int i = 0; i < _bridgePairs.size()-1; i+=2){
       std::cout << _parents[_fromSCC[_bridgePairs[i]-1]]*10 + _parents[_fromSCC[_bridgePairs[i+1]-1]] << " bridge " << std::endl;
     }

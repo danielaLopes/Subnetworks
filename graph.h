@@ -29,9 +29,9 @@ public:
   Graph(const int v);
   ~Graph();
   void addVertex(const int v, const int u);
-  void visit(const int ind, int *_ptrTime, int *_ptrCount);
+  void visit(const int ind, int *_ptrTime, int *_ptrCount, int *_ptrBridges);
   //int compare(const void *ptr1, const void *ptr2);
-  void orderBridges();
+  void orderBridges(int *_ptrBridges);
   void toString();
 };
 
