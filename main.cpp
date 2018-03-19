@@ -23,6 +23,21 @@
 //Constants
 const int NOTIME = 0; //The node hasn't been discovered yet
 
+struct bridge {
+  int _origin;
+  int _destiny;
+  bool equals(const struct bridge b) {
+    return ((_origin == b._origin) && (_destiny == b._destiny));
+  }
+}Bridge;
+
+int compare(const void *b1, const void *b2) {
+  if((((const struct bridge *)b1)->_origin - ((const struct bridge *)b2)->_origin) == 0){
+    return ((const struct bridge *)b1)->_destiny - ((const struct bridge *)b2)->_destiny;
+  }
+  return ((const struct bridge *)b1)->_origin - ((const struct bridge *)b2)->_origin;
+}
+
 class Graph{
 private:
   int _v;
@@ -33,8 +48,7 @@ private:
   int* _low;
   std::vector<int> _parents;
   int* _fromSCC;
-  std::vector<int> _bridgePairs;
-  std::vector<int> _bridges;
+  std::vector<struct bridge> _bridges;
 public:
   Graph(const int v) {
     _v = v;
@@ -87,23 +101,10 @@ public:
       if(_discTime[adjVertex] == NOTIME){
         visit(adjVertex, _ptrTime, _ptrCount, _ptrBridges);
         _low[ind] = std::min(_low[ind], _low[adjVertex]); //update low value
-        //finding bridges
-        if(_low[adjVertex] > _discTime[ind]){
-          _bridgePairs.push_back(ind+1);
-          _bridgePairs.push_back(adjVertex+1);
-          ++*_ptrBridges;
-        }
       }
       //the vertex was already visited and is still in stack
       else if(_inStack[adjVertex] == true){
         _low[ind] = std::min(_low[ind], _discTime[adjVertex]); //update low value
-      }
-      //the vertex was already visited but is out of stack, which means it belongs to a different scc
-      //finding other connecting paths
-      else if(_discTime[adjVertex] != NOTIME) {
-        _bridgePairs.push_back(ind+1);
-        _bridgePairs.push_back(adjVertex+1);
-        ++*_ptrBridges;
       }
     }
     //root of a SCC found
@@ -126,30 +127,41 @@ public:
       ++*_ptrCount;
     }
   }
-  //int compare(const void *ptr1, const void *ptr2);
-  void orderBridges(int *_ptrBridges) {
-    size_t i;
-    for(i = 0; i < _bridgePairs.size()-1; i+=2){
-      _bridges.push_back(_parents[_fromSCC[_bridgePairs[i]-1]]*10 + _parents[_fromSCC[_bridgePairs[i+1]-1]]);
+
+  void findBridges(const int ind, int *_ptrBridges){
+    int adjVertex;
+    std::list<int>::iterator it;
+    for(it = _adjList[ind].begin(); it!= _adjList[ind].end(); ++it){
+      adjVertex = *it;
+      //if they arent from the same SCC and connect, then there is a bridge
+      if(_fromSCC[ind] != _fromSCC[adjVertex]) {
+        ++*_ptrBridges;
+        struct bridge b = {_parents[_fromSCC[ind]], _parents[_fromSCC[adjVertex]]};
+        _bridges.push_back(b);
+      }
     }
-    std::sort(_bridges.begin(), _bridges.end());
+  }
+
+  void orderBridges(int *_ptrBridges) {
+    qsort(&(_bridges[0]), _bridges.size(), sizeof(struct bridge), compare);
+
+    size_t i;
+    //print number of bridges
     for(i=1; i < _bridges.size(); i++){
-      if(_bridges[i] == _bridges[i-1]) {
+      if(_bridges[i].equals(_bridges[i-1])) {
         --*_ptrBridges;
       }
     }
     printf("%d\n", *_ptrBridges);
-    printf("%d %d\n", _bridges[0] / 10, _bridges[0] % 10);
+    //print bridge pairs
+    printf("%d %d\n", _bridges[0]._origin, _bridges[0]._destiny);
     for(i=1; i < _bridges.size(); i++){
-      if(_bridges[i] != _bridges[i-1]) {
-        printf("%d %d\n", _bridges[i] / 10, _bridges[i] % 10);//guardar isto num vetor 
+      if(!(_bridges[i].equals(_bridges[i-1]))) {
+        printf("%d %d\n", _bridges[i]._origin, _bridges[i]._destiny);//guardar isto num vetor 
       }
     }
   }
 };
-
-
-//int compare(const void *ptr1, const void *ptr2, int *_ptrBridges);
 
 int main(){
   int _time = 0;
@@ -172,9 +184,11 @@ int main(){
     }  
   }
   printf("%d\n", *_ptrCount);
+  for(int i = 0; i < numRegions; i++){
+    graph->findBridges(i, _ptrBridges);
+  }
   if(*_ptrBridges > 0) {
     graph->orderBridges(_ptrBridges);
-    //qsort(&(graph->getBridges()[0]), graph->getBridges().size(), sizeof(int), compare(_ptrBridges));
   }
   else {
     printf("%d\n", *_ptrBridges);
@@ -182,10 +196,3 @@ int main(){
   delete graph;
   return 0;
 }
-
-/*int compare(const void *ptr1, const void *ptr2){
-  if((*(int*)ptr1 == *(int*)ptr2)) {
-    --*_ptrBridges;
-  }
-  return (*(int*)ptr1 < *(int*)ptr2);
-}*/
