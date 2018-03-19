@@ -28,7 +28,10 @@ private:
 public:
   Graph(const int v);
   ~Graph();
+<<<<<<< HEAD
   int getDiscTime(int index);
+=======
+>>>>>>> 1c77a60ae6f4285e408060f00d6282f47bcd1181
   void addVertex(const int v, const int u);
   void visit(const int ind, int *_ptrTime, int *_ptrCount, int *_ptrBridges);
   //int compare(const void *ptr1, const void *ptr2);

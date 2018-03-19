@@ -29,12 +29,16 @@ int main(){
     scanf("%d %d", &v, &u);
     graph->addVertex(v, u);
   }
+<<<<<<< HEAD
 
   for(int i = 0; i < numRegions; i++) {
     if(graph->getDiscTime(i) == NOTIME) {
       graph->visit(i, _ptrTime, _ptrCount, _ptrBridges);
     }  
   }
+=======
+  graph->visit(0, _ptrTime, _ptrCount, _ptrBridges);
+>>>>>>> 1c77a60ae6f4285e408060f00d6282f47bcd1181
   printf("%d\n", *_ptrCount);
   if(*_ptrCount > 1) {
     graph->orderBridges(_ptrBridges);
