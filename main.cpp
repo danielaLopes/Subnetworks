@@ -23,6 +23,12 @@
 //Constants
 const int NOTIME = 0; //The node hasn't been discovered yet
 
+//Global variables
+int _count = 0;
+int _bridgesCount = 0;
+int _time = 0;
+
+
 struct bridge {
   int _origin;
   int _destiny;
@@ -87,10 +93,10 @@ public:
   }
 
   //Tarjan's visit algorithm
-  void visit(const int ind, int *_ptrTime, int *_ptrCount, int *_ptrBridges) {
+  void visit(const int ind) {
     int adjVertex;
-    _discTime[ind] = ++*(_ptrTime);
-    _low[ind] = *(_ptrTime);
+    _discTime[ind] = ++_time;
+    _low[ind] = _time;
     _stack->push(ind+1); //Stack - vertexes are named ind + 1
     _inStack[ind] = true;
     std::list<int>::iterator it;
@@ -99,7 +105,7 @@ public:
       adjVertex = *it;
       //visit unvisited adjacent vertex
       if(_discTime[adjVertex] == NOTIME){
-        visit(adjVertex, _ptrTime, _ptrCount, _ptrBridges);
+        visit(adjVertex);
         _low[ind] = std::min(_low[ind], _low[adjVertex]); //update low value
       }
       //the vertex was already visited and is still in stack
@@ -115,83 +121,77 @@ public:
         j = (int) _stack->top();
         if(min > j){ min = j; }
         _inStack[j-1] = false;
-        _fromSCC[j-1] = *_ptrCount;
+        _fromSCC[j-1] = _count;
         _stack->pop();
       }
       j = (int) _stack->top();
       _inStack[j-1] = false;
       if(min > j){ min = j; }
       _parents.push_back(min);
-      _fromSCC[j-1] = *_ptrCount;
+      _fromSCC[j-1] = _count;
       _stack->pop();
-      ++*_ptrCount;
+      ++_count;
     }
   }
 
-  void findBridges(const int ind, int *_ptrBridges){
+  void findBridges(const int ind){
     int adjVertex;
     std::list<int>::iterator it;
     for(it = _adjList[ind].begin(); it!= _adjList[ind].end(); ++it){
       adjVertex = *it;
       //if they arent from the same SCC and connect, then there is a bridge
       if(_fromSCC[ind] != _fromSCC[adjVertex]) {
-        ++*_ptrBridges;
+      ++_bridgesCount;
         struct bridge b = {_parents[_fromSCC[ind]], _parents[_fromSCC[adjVertex]]};
         _bridges.push_back(b);
       }
     }
   }
 
-  void orderBridges(int *_ptrBridges) {
+  void orderBridges() {
     qsort(&(_bridges[0]), _bridges.size(), sizeof(struct bridge), compare);
 
     size_t i;
     //print number of bridges
     for(i=1; i < _bridges.size(); i++){
       if(_bridges[i].equals(_bridges[i-1])) {
-        --*_ptrBridges;
+        --_bridgesCount;
       }
     }
-    printf("%d\n", *_ptrBridges);
+    printf("%d\n", _bridgesCount);
     //print bridge pairs
     printf("%d %d\n", _bridges[0]._origin, _bridges[0]._destiny);
     for(i=1; i < _bridges.size(); i++){
       if(!(_bridges[i].equals(_bridges[i-1]))) {
-        printf("%d %d\n", _bridges[i]._origin, _bridges[i]._destiny);//guardar isto num vetor 
+        printf("%d %d\n", _bridges[i]._origin, _bridges[i]._destiny);//guardar isto num vetor
       }
     }
   }
 };
 
 int main(){
-  int _time = 0;
-  int _count = 0;
-  int _numBridges = 0;
-  int* _ptrTime = &_time;
-  int* _ptrCount = &_count;
-  int *_ptrBridges = &_numBridges;
   int numRegions, numConnections, v, u;
-  scanf("%d %d", &numRegions, &numConnections);
+  if(scanf("%d %d", &numRegions, &numConnections) == 0){printf("Error reading input\n");}
   Graph *graph = new Graph(numRegions);
 
   for(int i = 0; i < numConnections; i++){
-    scanf("%d %d", &v, &u);
+    if(scanf("%d %d", &v, &u) == 0) {printf("Error reading input\n");}
     graph->addVertex(v, u);
   }
   for(int i = 0; i < numRegions; i++) {
     if(graph->getDiscTime(i) == NOTIME) {
-      graph->visit(i, _ptrTime, _ptrCount, _ptrBridges);
-    }  
+      graph->visit(i);
+    }
   }
-  printf("%d\n", *_ptrCount);
+  printf("%d\n", _count);
   for(int i = 0; i < numRegions; i++){
-    graph->findBridges(i, _ptrBridges);
+    graph->findBridges(i);
   }
-  if(*_ptrBridges > 0) {
-    graph->orderBridges(_ptrBridges);
+  if(_bridgesCount > 0) {
+    graph->orderBridges();
   }
   else {
-    printf("%d\n", *_ptrBridges);
+    printf("%d\n", _bridgesCount);
   }
   delete graph;
   return 0;
