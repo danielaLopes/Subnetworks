@@ -48,7 +48,7 @@ class Graph{
 private:
   int _v;
   std::list<int>* _adjList;
-  std::stack<int>* _stack;
+  std::stack<int> _stack;
   bool* _inStack;
   int* _discTime;
   int* _low;
@@ -63,7 +63,6 @@ public:
     _fromSCC = new int[_v];
     //Initialize Stacks
     _inStack = new bool[_v];
-    _stack = new std::stack<int>[_v];
     _discTime = new int[_v];
     for(int i = 0; i < _v; i++){
       _inStack[i] = false;
@@ -80,7 +79,6 @@ public:
     delete[] _inStack;
     delete[] _discTime;
     delete[] _low;
-    delete[] _stack;
     delete[] _fromSCC;
   }
 
@@ -97,7 +95,7 @@ public:
     int adjVertex;
     _discTime[ind] = ++_time;
     _low[ind] = _time;
-    _stack->push(ind+1); //Stack - vertexes are named ind + 1
+    _stack.push(ind+1); //Stack - vertexes are named ind + 1
     _inStack[ind] = true;
     std::list<int>::iterator it;
     //visiting adjacent vertexes
@@ -116,20 +114,20 @@ public:
     //root of a SCC found
     if(_low[ind] == _discTime[ind]){
       int j = 0;
-      int min = (int) _stack->top();
-      while(_stack->top() != ind+1){
-        j = (int) _stack->top();
+      int min = (int) _stack.top();
+      while(_stack.top() != ind+1){
+        j = (int) _stack.top();
         if(min > j){ min = j; }
         _inStack[j-1] = false;
         _fromSCC[j-1] = _count;
-        _stack->pop();
+        _stack.pop();
       }
-      j = (int) _stack->top();
+      j = (int) _stack.top();
       _inStack[j-1] = false;
       if(min > j){ min = j; }
       _parents.push_back(min);
       _fromSCC[j-1] = _count;
-      _stack->pop();
+      _stack.pop();
       ++_count;
     }
   }
